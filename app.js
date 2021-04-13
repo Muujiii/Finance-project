@@ -1,4 +1,3 @@
-
 // Delgetstei ajillah controller
 let uiController = (function() {
 
