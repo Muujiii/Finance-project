@@ -12,7 +12,7 @@ let uiController = (function() {
     return {
         getInput: function(){ // public service
             return {
-                type: document.querySelector(DOMstrings.inputType).value,
+                type: document.querySelector(DOMstrings.inputType).value, // exp or inc butsaana
                 description: document.querySelector(DOMstrings.inputDescription).value,
                 value: document.querySelector(DOMstrings.inputValue).value
 
@@ -29,20 +29,22 @@ let uiController = (function() {
 
 // Sanhuutei ajillah controller
 let financeController = (function() {
+    // private fn
     let Income = function(id, description, value) {
         this.id = id;
         this.description = description;
         this.value = value;
-    }
-      
+    };
+    // private fn
     let Expense = function(id, description, value) {
         this.id = id;
         this.description = description;
         this.value = value;
-    }
+    };
 
+    // private data
     let data = {
-        allItems: {
+        items: {
             inc: [],
             exp: []
         },
@@ -50,6 +52,32 @@ let financeController = (function() {
         totals: {
             inc: 0,
             exp: 0
+        }
+    };
+
+    // private datag public service bolgohiin tuld butsaaj ogno.
+    // Dotoroo closure-toi object butsaah zamaar shiidne
+    return {
+        addItem: function(type, desc, val) {
+            let item, id;
+            // identification ID
+            if (data.items[type].length === 0) {
+                id = 1;
+            } else {
+                id = data.items[type][data.items[type].length - 1].id + 1;
+            }
+
+            if (type === "inc") {
+                item = new Income(id, desc, val);
+            } else {
+                item = new Expense(id, desc, val);
+            }
+
+            data.items[type].push(item);
+        },
+
+        seeData: function(){
+            return data;
         }
     }
 
@@ -60,9 +88,12 @@ let financeController = (function() {
 let appController = (function(uiController, financeController) {
     let ctrlAddItem = function() {  // private function
         // 1. Oruulah ogogdliig delgetsnees olj avna.
+        let input = uiController.getInput();  
+        
 
-        console.log(uiController.getInput());
         // 2. Olj avsan ogogdlvvdee Sanhvvgiin controllert damjuulj tend hadgalna
+        financeController.addItem(input.type, input.description, input.value);
+        
         // 3. Olj avsan ogogdlvvdiig web page deeree tohiroh hesegt gargana
         // 4. Tosviig tootsoolno
         // 5. Etssiin vldegdel , tootsoog delgetsend gargana
