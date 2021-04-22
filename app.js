@@ -5,8 +5,9 @@ let uiController = (function() {
         inputType: ".add__type",
         inputDescription: ".add__description",
         inputValue: ".add__value",
-        addBtn: ".add__btn"
-
+        addBtn: ".add__btn",
+        incomeList: ".income__list",
+        expenseList: ".expenses__list"
     }
 
     return {
@@ -14,23 +15,40 @@ let uiController = (function() {
             return {
                 type: document.querySelector(DOMstrings.inputType).value, // exp or inc butsaana
                 description: document.querySelector(DOMstrings.inputDescription).value,
-                value: document.querySelector(DOMstrings.inputValue).value
+                value: parseInt( document.querySelector(DOMstrings.inputValue).value )
 
-            }
+            };
         },
 
         getDOMstrings: function() {  // hoyor doh public service
             return DOMstrings;
         },
 
+        
+        clearFields: function() {
+            let fields = document.querySelectorAll(DOMstrings.inputDescription + ", " + DOMstrings.inputValue);
+
+            // Convert List to Array
+            let fieldsArr = Array.prototype.slice.call(fields);
+            
+            fieldsArr.forEach((element, index, array) => {
+                    element.value = "";
+            });
+
+            fieldsArr[0].focus();
+            // for (let i=0; i < fieldsArr.length; i++) {
+            //     fieldsArr[i].value = "";
+            // }
+        },
+
         addListItem: function(item, type) {
             // Orlogo zarlagiin elementiig aguulsan HTML-ig beltgene.
             let html, list;
             if (type === "inc"){
-                list = ".income__list";
+                list = DOMstrings.incomeList;
                 html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%%DESCRIPTION%%</div><div class="right clearfix"><div class="item__value">%%VALUE%%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             } else {
-                list = ".expenses__list";
+                list = DOMstrings.expenseList;
                 html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%%DESCRIPTION%%</div><div class="right clearfix"><div class="item__value">%%VALUE%%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
             // Ter HTML dotroo orlogo zarlagiin utguudiig REPLACE ashiglaj oorchilj ogno
@@ -64,6 +82,15 @@ let financeController = (function() {
         this.value = value;
     };
 
+    let calculateTotal = function(type) {
+        let sum = 0;
+        data.items[type].forEach(function(el) {
+            sum += el.value;
+        });
+
+        data.totals[type] = sum;
+    };
+
     // private data
     let data = {
         items: {
@@ -74,12 +101,39 @@ let financeController = (function() {
         totals: {
             inc: 0,
             exp: 0
-        }
+        },
+
+        tusuv: 0,
+        huvi: 0
     };
 
     // private datag public service bolgohiin tuld butsaaj ogno.
     // Dotoroo closure-toi object butsaah zamaar shiidne
     return {
+        tusuvTootsooloh: function() {
+            // Niit orlogiin niilber
+            calculateTotal("inc");
+
+            // Niit Zarlagiin niilber
+            calculateTotal("exp");
+
+            // Tusviig shineer tootsoolno
+            data.tusuv = data.totals.inc - data.totals.exp;
+
+            // Orlogo zarlagiin huviig tootsoolno
+            data.huvi = Math.round(data.totals.exp / data.totals.inc*100);
+        },
+
+        tusviigAvah: function() {
+            return {
+                tusuv: data.tusuv,
+                huvi: data.huvi,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp
+            }
+        },
+
+
         addItem: function(type, desc, val) {
             let item, id;
             // identification ID
@@ -114,14 +168,28 @@ let appController = (function(uiController, financeController) {
         // 1. Oruulah ogogdliig delgetsnees olj avna.
         let input = uiController.getInput();  
         
+        if(input.description !== "" && input.value !== ""){
+            // 2. Olj avsan ogogdlvvdee Sanhvvgiin controllert damjuulj tend hadgalna
+            let item = financeController.addItem(input.type, input.description, input.value);
+            
+            // 3. Olj avsan ogogdlvvdiig web page deeree tohiroh hesegt gargana
+            uiController.addListItem(item, input.type);
+            uiController.clearFields();
 
-        // 2. Olj avsan ogogdlvvdee Sanhvvgiin controllert damjuulj tend hadgalna
-        let item = financeController.addItem(input.type, input.description, input.value);
-        
-        // 3. Olj avsan ogogdlvvdiig web page deeree tohiroh hesegt gargana
-        uiController.addListItem(item, input.type);
-        // 4. Tosviig tootsoolno
-        // 5. Etssiin vldegdel , tootsoog delgetsend gargana
+            // 4. Tosviig tootsoolno
+
+            financeController.tusuvTootsooloh();
+
+
+            // 5. Etssiin vldegdel , tootsoog delgetsend gargana
+            let tusuv = financeController.tusviigAvah();
+
+            // 6. Tusviin tootsoog delgetsend gargana
+
+            console.log(tusuv);
+        }
+    
+
     };
 
     let setupEventListeners = function() {
