@@ -11,7 +11,8 @@ let uiController = (function() {
         tusuvLabel: ".budget__value",
         incomeLabel: ".budget__income--value",
         expenseLabel: ".budget__expenses--value",
-        percentageLabel: ".budget__expenses--percentage"
+        percentageLabel: ".budget__expenses--percentage",
+        containerDiv: ".container"
     };
 
     return {
@@ -61,15 +62,22 @@ let uiController = (function() {
             }
         },
 
+
+        deleteListItem: function(id) {
+            let el = document.getElementById(id);
+            el.parentNode.removeChild(el);
+        },
+
+
         addListItem: function(item, type) {
             // Orlogo zarlagiin elementiig aguulsan HTML-ig beltgene.
             let html, list;
             if (type === "inc"){
                 list = DOMstrings.incomeList;
-                html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%%DESCRIPTION%%</div><div class="right clearfix"><div class="item__value">%%VALUE%%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%%DESCRIPTION%%</div><div class="right clearfix"><div class="item__value">%%VALUE%%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             } else {
                 list = DOMstrings.expenseList;
-                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%%DESCRIPTION%%</div><div class="right clearfix"><div class="item__value">%%VALUE%%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%%DESCRIPTION%%</div><div class="right clearfix"><div class="item__value">%%VALUE%%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
             // Ter HTML dotroo orlogo zarlagiin utguudiig REPLACE ashiglaj oorchilj ogno
             html = html.replace('%id%', item.id);
@@ -154,6 +162,19 @@ let financeController = (function() {
         },
 
 
+        deleteItem: function(type, id) {
+            let ids = data.items[type].map(function(el){
+                return el.id;
+            });
+
+            let index = ids.indexOf(id);
+
+            if( index !== -1){
+                data.items[type].splice(index, 1);
+            }
+        },
+
+
         addItem: function(type, desc, val) {
             let item, id;
             // identification ID
@@ -225,7 +246,27 @@ let appController = (function(uiController, financeController) {
                 ctrlAddItem();
             }
         });
-    }
+
+        document.querySelector(DOM.containerDiv).addEventListener('click', function(event){
+            let id = event.target.parentNode.parentNode.parentNode.parentNode.id; // inc-1 , exp-2 gej irne
+
+            if(id) {
+                let arr = id.split("-");  // inc-2
+                let type = arr[0];
+                let itemId = parseInt(arr[1]);  // "2"
+                console.log(type + '===>' + id);
+
+                // 1. Sanhvvgiin modulias type, id ashiglaad ustgana.
+                financeController.deleteItem(type, itemId);
+
+                // 2. Delgets deerees ene elementiig ustgana
+                uiController.deleteListItem(id);
+
+                // 3. Vldegedel tootsoog shinechlej haruulna.
+
+            }
+        });
+    };
 
     return {   // public service bolgoj bna. initiig duudahaas naash ajillahgvi
         init: function() {
