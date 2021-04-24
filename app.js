@@ -24,6 +24,30 @@ let uiController = (function() {
     };
 
 
+    let formatMoney = function(too, type) {
+        too = "" + too;
+        let x = too.split("").reverse().join("");
+
+        let y = "";
+        let count = 1;
+        for (let i=0; i < x.length; i++) {
+            y = y + x[i];
+
+            if (count % 3 === 0) y = y + ",";
+            count++;
+        }
+
+        let z = y.split("").reverse().join("");
+        if (z[0] === ",") z = z.substr(1, z.length - 1);
+
+        if (type === "inc") z =  "+ " + z;
+        else  z = "- " + z;
+
+        return z;
+    };
+
+
+
     return {
         displayDate: function() {
             let unuudur = new Date();
@@ -79,9 +103,13 @@ let uiController = (function() {
         // totalExp: data.totals.exp
 
         tusviigUzuuleh: function(tusuv) {
-            document.querySelector(DOMstrings.tusuvLabel).textContent = tusuv.tusuv;
-            document.querySelector(DOMstrings.incomeLabel).textContent = tusuv.totalInc;
-            document.querySelector(DOMstrings.expenseLabel).textContent = tusuv.totalExp;
+            let type;
+            if (tusuv.tusuv > 0 ) type = "inc";
+            else type = "exp";
+
+            document.querySelector(DOMstrings.tusuvLabel).textContent = formatMoney(tusuv.tusuv, type);
+            document.querySelector(DOMstrings.incomeLabel).textContent = formatMoney(tusuv.totalInc, "inc");
+            document.querySelector(DOMstrings.expenseLabel).textContent = formatMoney(tusuv.totalExp, "exp");
 
             if (tusuv.huvi !== 0){
                 document.querySelector(DOMstrings.percentageLabel).textContent = tusuv.huvi + "%";
@@ -110,7 +138,7 @@ let uiController = (function() {
             // Ter HTML dotroo orlogo zarlagiin utguudiig REPLACE ashiglaj oorchilj ogno
             html = html.replace('%id%', item.id);
             html = html.replace("%%DESCRIPTION%%", item.description);
-            html = html.replace("%%VALUE%%", item.value);
+            html = html.replace("%%VALUE%%", formatMoney(item.value, type));
 
 
             // Beltgesen HTML -ee DOM ruu hiij ogno
