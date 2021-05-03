@@ -55,6 +55,16 @@ let uiController = (function() {
         },
 
 
+        changeType: function() {
+            let fields = document.querySelectorAll(DOMstrings.inputType + ', ' + DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+
+            nodeListForeach(fields, function(el) {
+                el.classList.toggle('red-focus');
+            });
+
+            document.querySelector(DOMstrings.addBtn).classList.toggle('red');
+        },
+
         getInput: function(){ // public service
             return {
                 type: document.querySelector(DOMstrings.inputType).value, // exp or inc butsaana
@@ -348,6 +358,11 @@ let appController = (function(uiController, financeController) {
                 ctrlAddItem();
             }
         });
+
+
+        document.querySelector(DOM.inputType).addEventListener('change', uiController.changeType);
+
+
 
         document.querySelector(DOM.containerDiv).addEventListener('click', function(event){
             let id = event.target.parentNode.parentNode.parentNode.parentNode.id; // inc-1 , exp-2 gej irne
